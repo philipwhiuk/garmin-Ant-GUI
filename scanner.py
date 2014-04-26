@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# main.py
+# scanner.py
 # USB Scanner
 
 from wx.lib.pubsub import Publisher as pub
