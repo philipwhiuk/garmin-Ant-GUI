@@ -4,7 +4,7 @@
 import wx
 from wx.lib.pubsub import Publisher as pub
 from scanner import Scanner
-
+from connector import Connector
 
 # Model: Contains information on device
 class DeviceData:
@@ -39,6 +39,7 @@ class MainView(wx.Frame):
          # Bottom Panel
          bottomPanel = wx.Panel(self)
          activities = wx.StaticText(bottomPanel, label="Activities", pos=(20,0))
+         self.syncActivities = wx.Button(bottomPanel, wx.ID_ANY, "Sync activities", pos=(40, 30))
          # Layout
          self.sizer = wx.BoxSizer(wx.VERTICAL)
          self.sizer.Add(topPanel, 1, wx.EXPAND)
@@ -56,18 +57,43 @@ class MainController:
         self.deviceData = DeviceData()
         self.view = MainView(None)
         self.view.scanForDevices.Bind(wx.EVT_BUTTON, self.ScanForDevices)
+        self.view.syncActivities.Bind(wx.EVT_BUTTON, self.SyncActivities)
         self.view.Bind(wx.EVT_MENU, self.OnAbout, self.view.aboutMenuItem)
         self.view.Bind(wx.EVT_MENU, self.OnExit, self.view.exitMenuItem)
         self.view.Show()
         self.scanner = Scanner()
+        self.connector = Connector()
         pub.subscribe(self.ScanningStarted, "SCANNING STARTED")
+        pub.subscribe(self.DeviceDetected, "DEVICE DETECTED")
+        pub.subscribe(self.ActivityRetrieved, "ACTIVITY RETRIEVED")
         pub.subscribe(self.ScanningEnded, "SCANNING ENDED")
+        pub.subscribe(self.SyncStarted, "SYNC STARTED")
+        pub.subscribe(self.SyncEnded, "SYNC ENDED")
+        pub.subscribe(self.LoginSuccesful, "LOGIN SUCCESFUL")
+        pub.subscribe(self.LoginFailed, "LOGIN FAILED")
+        pub.subscribe(self.ActivitiesUploaded, "ACTIVITIES UPLOADED")
     def ScanForDevices(self, evt):
         self.scanner.scan()
     def ScanningStarted(self, evt):
         self.view.setStatus("Scanning started")
     def ScanningEnded(self, evt):
         self.view.setStatus("Scanning ended")
+    def DeviceDetected(self, evt):
+        self.view.setStatus("Device detected")
+    def ActivityRetrieved(self, evt):
+        self.view.setStatus("Retrieved activity")
+    def SyncActivities(self, evt):
+        self.connector.sync()
+    def SyncStarted(self, evt):
+        self.view.setStatus("Sync started")
+    def SyncEnded(self, evt):
+        self.view.setStatus("Sync ended")
+    def LoginSuccesful(self, evt):
+        self.view.setStatus("Login Succesful")
+    def LoginFailed(self, evt):
+        self.view.setStatus("Login Failed")
+    def ActivitiesUploaded(self, evt):
+        self.view.setStatus("Activities Uploaded")
     def OnExit(self,e):
         self.Close(True)
     def OnAbout(self, event):
