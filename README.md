@@ -6,7 +6,8 @@ Python based UI for a Linux version of Garmin ANT Agent
 ## Requirements
 
 * Python
-* wxPython
+* wxPython (Python UI)
+* requests (Python module, available in pip)
 
 ## Roadmap
 

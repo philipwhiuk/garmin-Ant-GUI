@@ -7,10 +7,11 @@ from wx.lib.pubsub import Publisher as pub
 # Controller: Interacts with remote sites to synchronize activities
 class Connector:
     def __init__(self):
-          self.activityCount = 0
+         self.connectors = []
+    def addConnector(self, connector):
+         self.connectors.append(connector)
     def sync(self):
          pub.sendMessage("SYNC STARTED")
-         """
-         TODO Synchronization
-         """
+         for connector in self.connectors:
+              connector.sync()
          pub.sendMessage("SYNC ENDED")                                            

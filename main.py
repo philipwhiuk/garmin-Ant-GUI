@@ -2,9 +2,11 @@
 # main.py
 # Entry point for Application
 import wx
+import logging
 from wx.lib.pubsub import Publisher as pub
 from scanner import Scanner
 from connector import Connector
+from garminConnect import GarminConnector
 
 # Model: Contains information on device
 class DeviceData:
@@ -63,6 +65,8 @@ class MainController:
         self.view.Show()
         self.scanner = Scanner()
         self.connector = Connector()
+        ## TODO Preferences for Selected Connectors
+        self.connector.addConnector(GarminConnector())
         pub.subscribe(self.ScanningStarted, "SCANNING STARTED")
         pub.subscribe(self.DeviceDetected, "DEVICE DETECTED")
         pub.subscribe(self.ActivityRetrieved, "ACTIVITY RETRIEVED")
@@ -97,10 +101,10 @@ class MainController:
     def OnExit(self,e):
         self.Close(True)
     def OnAbout(self, event):
-        dlg = wx.MessageDialog( self.view, "A community-developed Linux version of the ANT Agent. Supports Garmin-based fitness devices that communicate either over USB serial or via the ANT USB connector. Developed by Philip Whitehouse, based on work by Braiden Kindt and Gustav Tiger. Copyright 2014", "About ANT Agent for Linux", wx.OK);
+        dlg = wx.MessageDialog( self.view, "A community-developed Linux version of the ANT Agent. Supports Garmin-based fitness devices that communicate either over USB serial or via the ANT USB connector. Developed by Philip Whitehouse, based on work by Braiden Kindt, Gustav Tiger and Collin (cpfair). Copyright 2014", "About ANT Agent for Linux", wx.OK);
         dlg.ShowModal()
         dlg.Destroy()
-
+logging.basicConfig()
 app = wx.App(False)
 controller = MainController(app)
 app.MainLoop()
