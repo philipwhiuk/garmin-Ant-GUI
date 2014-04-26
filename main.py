@@ -3,10 +3,19 @@
 # Entry point for Application
 import wx
 from wx.lib.pubsub import Publisher as pub
+from scanner import Scanner
 
+
+# Model: Contains information on device
 class DeviceData:
     def __init__(self):
          self.deviceName = "None"
+
+# Model: Contains list of activities to sync with remote source
+class ActivityList:
+    def __init__(self):
+         self.activityCount = 0
+# View: Main Frame
 class MainView(wx.Frame):
     def __init__(self, parent):
          wx.Frame.__init__(self, parent, title='ANT Agent for Linux', size=(640,480))
@@ -19,7 +28,7 @@ class MainView(wx.Frame):
          menuBar.Append(filemenu, "&File")
          self.SetMenuBar(menuBar)
          # Status Bar
-         statusBar = self.CreateStatusBar()
+         self.statusBar = self.CreateStatusBar()
          # Top Panel
          topPanel = wx.Panel(self)
          deviceData = wx.StaticText(topPanel, label="Device Details", pos=(20,0))
@@ -38,6 +47,10 @@ class MainView(wx.Frame):
          self.SetAutoLayout(1)
          # self.sizer.Fit(self)
          self.Show(True)
+    def setStatus(self, message):
+         self.statusBar.SetStatusText(message)
+
+# Controller : Handles logic for main screen
 class MainController:
     def __init__(self, app):
         self.deviceData = DeviceData()
@@ -46,10 +59,15 @@ class MainController:
         self.view.Bind(wx.EVT_MENU, self.OnAbout, self.view.aboutMenuItem)
         self.view.Bind(wx.EVT_MENU, self.OnExit, self.view.exitMenuItem)
         self.view.Show()
+        self.scanner = Scanner()
+        pub.subscribe(self.ScanningStarted, "SCANNING STARTED")
+        pub.subscribe(self.ScanningEnded, "SCANNING ENDED")
     def ScanForDevices(self, evt):
-         """
-         TODO: Integrate device scanning here.
-         """
+        self.scanner.scan()
+    def ScanningStarted(self, evt):
+        self.view.setStatus("Scanning started")
+    def ScanningEnded(self, evt):
+        self.view.setStatus("Scanning ended")
     def OnExit(self,e):
         self.Close(True)
     def OnAbout(self, event):
