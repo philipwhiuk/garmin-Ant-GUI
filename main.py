@@ -7,6 +7,7 @@ from wx.lib.pubsub import Publisher as pub
 from scanner import Scanner
 from connector import Connector
 from garminConnect import GarminConnector
+from ant import AntScanner
 
 # Model: Contains information on device
 class DeviceData:
@@ -17,6 +18,25 @@ class DeviceData:
 class ActivityList:
     def __init__(self):
          self.activityCount = 0
+# View: Activity Tab
+class ActivityTab(wx.Panel):
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
+	self.title = wx.StaticText(self, label="Activities", pos=(20,0))
+        self.syncActivities = wx.Button(self, wx.ID_ANY, "Sync activities", pos=(40, 30))
+
+# View: Courses Tab
+class CoursesTab(wx.Panel):
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
+        self.title = wx.StaticText(self, label="Courses", pos=(20,0))
+
+# View: Workouts Tab
+class WorkoutsTab(wx.Panel):
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
+        self.title = wx.StaticText(self, label="Workouts", pos=(20,0))
+
 # View: Main Frame
 class MainView(wx.Frame):
     def __init__(self, parent):
@@ -40,8 +60,18 @@ class MainView(wx.Frame):
          self.scanForDevices = wx.Button(topPanel, wx.ID_ANY, "Scan for devices", pos=(40, 120))
          # Bottom Panel
          bottomPanel = wx.Panel(self)
-         activities = wx.StaticText(bottomPanel, label="Activities", pos=(20,0))
-         self.syncActivities = wx.Button(bottomPanel, wx.ID_ANY, "Sync activities", pos=(40, 30))
+         tabs = wx.Notebook(bottomPanel)
+         activityTab = ActivityTab(tabs)
+         self.syncActivities = activityTab.syncActivities
+         tabs.AddPage(activityTab, "Activities")
+         coursesTab = CoursesTab(tabs)
+         tabs.AddPage(coursesTab, "Courses")
+         workoutsTab = WorkoutsTab(tabs)
+         tabs.AddPage(workoutsTab, "Workouts")
+         
+         sizer = wx.BoxSizer(wx.VERTICAL)
+         sizer.Add(tabs, 1, wx.ALL|wx.EXPAND, 5)
+         bottomPanel.SetSizer(sizer)
          # Layout
          self.sizer = wx.BoxSizer(wx.VERTICAL)
          self.sizer.Add(topPanel, 1, wx.EXPAND)
@@ -64,6 +94,8 @@ class MainController:
         self.view.Bind(wx.EVT_MENU, self.OnExit, self.view.exitMenuItem)
         self.view.Show()
         self.scanner = Scanner()
+        ## TODO Preferences for Selected Scanners
+        self.scanner.addScanner(AntScanner())
         self.connector = Connector()
         ## TODO Preferences for Selected Connectors
         self.connector.addConnector(GarminConnector())
